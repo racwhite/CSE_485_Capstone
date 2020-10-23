@@ -8,13 +8,20 @@ import linecache
 import os
 import pdb
 import ipdb
-import myscript2
+#import myscript2
 import io
 import code
 import inspect
 import bdb
 import cmd
 import pprint
+import signal
+import keyboard
+import turtle
+import threading
+import time
+import hunter
+
 #import myscript2
 
 class Python_tacer(pdb.Pdb):
@@ -36,7 +43,7 @@ class Python_tacer(pdb.Pdb):
     previous_command = "s"
     output = ""
     stick_out = False
-    list_lines = False
+    list_lines = True
     break_line = 1
     num = 1
     return_present = False
@@ -48,14 +55,24 @@ class Python_tacer(pdb.Pdb):
     keywords = ""
     keywords_out = ""
     stick_keywords = False
+    continue_code = False
+    step = []
+    command_index = 0
+    initial_run = 0
+    flag = 2
+
+    var = 0
+    var_mutex = threading.Lock()
+    var_event = threading.Event()
 
     def __init__(self):
         filepath = ""
+        #self.e = threading_event_handler
 
     def setFilePath(self, filepath_set):
         self.filepath_var = filepath_set
-        self.Pdbn = pdb.Pdb()
-        self.filename_test = ''
+        #self.Pdbn = pdb.Pdb()
+        #self.filename_test = ''
         #path = os.getcwd()+self.filepath_var
         #spec = importlib.util.spec_from_file_location("target", path)
         #foo = importlib.util.module_from_spec(spec)
@@ -73,6 +90,11 @@ class Python_tacer(pdb.Pdb):
             #print(frame.f_locals)
             #print(frame.f_globals)
             #print(tt)
+            # if type(frame.f_locals[tt]) != "1":
+            #     pprint.pprint(frame.f_locals[tt])
+            #     print(pprint.saferepr(frame.f_locals[tt]))
+            #print(tt + " = " + str(frame.f_globals[tt]))
+            #print(frame.f_globals[tt])
             print(tt + " = " + str(frame.f_locals[tt]))
             #print(tt + " = ", frame.f_globals[tt] + "(var is global)")
             print("-----------------------------------")
@@ -133,7 +155,10 @@ class Python_tacer(pdb.Pdb):
         # statement = "exec(compile(%r, %r, 'exec'))" % \
         #             (file.read(), path)
         settrace(tracer_func)
+        #hunter.trace()
+        self.flag = 0
         exec(thing5, globals, None)
+        self.flag = 1
 
 
     def exec_steps(self, keyword, varWatchList=None):
@@ -154,12 +179,12 @@ class Python_tacer(pdb.Pdb):
             self.skipline = False
             self.skipfunction = ""
             #self.skipinnerline = False
-        else:
-            d = 2
-        print(frame.f_code.co_filename)
+        # else:
+        #     d = 2
+        #print(frame.f_code.co_filename)
         if frame.f_code.co_filename != os.getcwd()+self.filepath_var:
             settrace(None)
-        print(event + frame.f_code.co_name )
+        #print(event + frame.f_code.co_name )
         length_file = len(self.filepath_var)
         filename = self.filepath_var[1:length_file]
         self.check_for_keywords(self.keywords, frame, filename)
@@ -183,9 +208,9 @@ class Python_tacer(pdb.Pdb):
         if event == "call" or event == "return" or event == "line":
             if command is "s":
                 if event == "return":
-                    print("got here in self.__my_tracer6")
+                    #print("got here in self.__my_tracer6")
                     self.__my_tracer6
-                    return self.__func6(frame.f_back, event ,arg)
+                    #return self.__func6(frame.f_back, event ,arg)
                 else:
                     return self.__func6
             else:
@@ -198,7 +223,7 @@ class Python_tacer(pdb.Pdb):
         if self.skipline == False:
             self.lines(frame, event)
         if event == "return":
-            print("Here")
+            #print("Here")
             return self.__my_tracer6
         return self.__my_tracer6
 
@@ -216,19 +241,38 @@ class Python_tacer(pdb.Pdb):
         length_file = len(self.filepath_var)
         filename = self.filepath_var[1:length_file]
         line = linecache.getline(filename, frame.f_lineno)
-        if self.skipinnerline != True:
+        path = os.getcwd()+self.filepath_var
+        if self.skipinnerline != True: #and (self.continue_code == False or self.break_line == frame.f_lineno):
             print("-------------------end output----------")
             #print(event)
             #print(self.end)
+            self.continue_code = False
             self.lines(frame, event)
             #self.check_for_keywords(self.keywords, frame, filename)
             if self.stick_keywords == True:
                 self.keywords_print_out(frame, filename)
-            command2 = self.command_func(input("***Prompt***\n(PTR)"), frame, event)
+            if self.initial_run != 0:
+                self.step[self.command_index-1] = ''
+                self.Set(0)
+                self.WaitUntil(1)
+            else:
+                self.initial_run = self.initial_run + 1
+            command2 = self.command_func(self.step[self.command_index],frame,event)
+            print(self.step)
+            #print(threading.current_thread())
+            #print(threading.main_thread())
+            self.command_index = self.command_index + 1
+            # if len(self.step)-1 != self.command_index:
+            #     self.command_index = self.command_index + 1
+            # if len(self.step)-1 == self.command_index:
+            #     settrace(None)
+            print(line)
+            #command2 = self.command_func(input("***Prompt***\n" + path + "\n(PTR)"), frame, event)
+            print("\n")
         else:
             command2 = "ss"
         if command2 == 's':
-            print(line.strip()[0:6])
+            #print(line.strip()[0:6])
             self.__print_Local_vars(frame, event, arg)
             self.previous_line = line
             return self.__func6
@@ -237,7 +281,7 @@ class Python_tacer(pdb.Pdb):
             self.__print_Local_vars(frame, event, arg)
             self.skipline = True
             self.skipfunction = frame.f_code.co_name
-            print(self.skipfunction)
+            #print(self.skipfunction)
             return self.step_over
 
     def command_func(self, command, frame, event):
@@ -282,13 +326,20 @@ class Python_tacer(pdb.Pdb):
             self.lines(frame, event)
             self.command_func(input("***Prompt***\n(PTR)"), frame, event)
         if command[0] == "s":
+            #settrace(None);
             return "s"
             self.previous_command = command
         if command[0] == "n":
             return "n"
             self.previous_command = command
-        if command[0] == "b":
-            self.break_line = 2
+        # if command[0] == "b":
+        #     self.break_line = int(command[2:len(command)])
+        #     print(self.break_line)
+        #     self.lines(frame, event)
+        #     self.command_func(input("***Prompt***\n(PTR)"), frame, event)
+        # if command == "cont":
+        #     self.continue_code = True
+        #     return "s"
         return "s"
 
     def lines(self, frame, event):
@@ -340,3 +391,72 @@ class Python_tacer(pdb.Pdb):
         self.check_for_keywords(self.keywords, frame, filename)
         print(self.keywords_out)
         print("----------------key words Done---------")
+
+    def step1(self):
+        self.step.append('s')
+        #self.step.append('s')
+
+    def next1(self):
+        self.step.append('n')
+        #self.step.append('n')
+
+    def WaitUntil(self, v):
+        while True:
+            self.var_mutex.acquire()
+            if self.var == v:
+                self.var_mutex.release()
+                return # Done waiting
+            self.var_mutex.release()
+            self.var_event.wait(1) # Wait 1 sec
+
+    def Set(self, v):
+        self.var_mutex.acquire()
+        self.var = v
+        self.var_mutex.release()
+        self.var_event.set() # In case someone is waiting
+        self.var_event.clear()
+
+
+
+#self.test = threading.Event()
+thing1 = Python_tacer()
+thing1.watchVar("a")
+thing1.watchVar("d")
+thing1.watchVar("data")
+#thing1.setFilePath(sys.argv[1])
+
+def quit():
+    thing1.WaitUntil(0)
+    settrace(None)
+    thing1.step1()
+    #thing1.step1()
+    #time.sleep(1)
+    thing1.Set(1)
+
+def step():
+    thing1.WaitUntil(0)
+    print("num of threads = ", threading.active_count())
+    thing1.step1()
+    thing1.Set(1)
+
+def stepover():
+    thing1.WaitUntil(0)
+    thing1.next1()
+    thing1.Set(1)
+
+def Thread0():
+    #thing1.WaitUntil(0)
+    print("")
+
+def Thread1():
+    thing1.WaitUntil(1)
+    # while thing1.flag == 0:
+    #     time.sleep(.0001)
+    thing1.exec_steps('for')
+
+def start():
+    #$os.fork()
+    #thing1 = Python_tacer()
+    t1 = threading.Thread(name='Thread0', target=Thread0).start()
+    t2 = threading.Thread(name='Thread1', target=Thread1).start()
+    #t3 = threading.Thread(name='Thread2', target=Thread2).start()
