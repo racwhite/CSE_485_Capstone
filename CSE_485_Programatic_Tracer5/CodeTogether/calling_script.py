@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-#from Test_waiter import *
-#import Test_waiter
 import myscript4
-#import time
+
+
 myscript4.thing1.setFilePath("/test/functioncalls.py")
 myscript4.start()
 myscript4.analysis()
@@ -14,20 +13,18 @@ myscript4.step()
 myscript4.step()
 myscript4.step()
 myscript4.step()
-
-myscript4.step()
-myscript4.step()
-myscript4.step()
-myscript4.step()
-myscript4.step()
-myscript4.step()
-myscript4.step()
-myscript4.step()
-myscript4.step()
+#
 myscript4.step()
 myscript4.stepout()
-myscript4.addbreakpoint([48])
+myscript4.step()
+myscript4.step()
+
+myscript4.addbreakpoint([30])
 myscript4.continue_run()
+myscript4.step()
+myscript4.step()
+
+
 #myscript4.step()
 #myscript4.step()
 # myscript4.addbreakpoint([25])
@@ -62,12 +59,17 @@ myscript4.continue_run()
 # myscript4.continue_run()
 
 
-# myscript4.quit()
-# # # #
-# myscript4.thing1.setFilePath("/test/functioncalls.py")
+#myscript4.quit()
+# # #
+# myscript4.thing1.setFilePath("/test/helloworld.py")
 # # #myscript4.thing1.reset_steplist()
-# print("before start")
+# #print("before start")
 # myscript4.start()
+# myscript4.step()
+# myscript4.step()
+# myscript4.step()
+
+
 # print("after start")
 # myscript4.step()
 # myscript4.addbreakpoint([22])
