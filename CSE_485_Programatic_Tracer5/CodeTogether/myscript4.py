@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from cactus import Node
+#from cactus import Node
 import analysis3
 import importlib.util
 from sys import settrace
@@ -48,12 +48,15 @@ class Python_tacer():
         self.cur_event = 0
         self.quit_value = 0
         self.oldline = ""
+        #self.localStorage = threading.local()
+        #self.localStorage.step = []
+        #self.localStorage.command_index = 0
 
         self.var = 0
         self.var_mutex = threading.Lock()
         self.var_event = threading.Event()
 
-        self.CactusStack = None
+        #self.CactusStack = None
 
     """
     This function does nothing and is not used in the code
@@ -107,19 +110,21 @@ class Python_tacer():
 
         #make sure to uncomment
         self.cur_frame = frame
-        if(self.CactusStack is None or self.CactusStack.is_empty()):
-            self.CactusStack = Node(frame.f_code.co_name, frame.f_locals)
-            self.CactusStack.reset_scopes()
-            Node.scopes = [frame.f_code.co_name]
-            del self.CactusStack.current_frame.vars['__builtins__']
-            print(self.CactusStack.print_tree())
-        else:
-            self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
-            print(self.CactusStack.print_tree())
+        # if(self.CactusStack is None or self.CactusStack.is_empty()):
+        #     self.CactusStack = Node(frame.f_code.co_name, frame.f_locals)
+        #     self.CactusStack.reset_scopes()
+        #     Node.scopes = [frame.f_code.co_name]
+        #     del self.CactusStack.current_frame.vars['__builtins__']
+        #     print(self.CactusStack.print_tree())
+        # else:
+        #     self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
+        #     print(self.CactusStack.print_tree())
 
         if event == 'call':
+            print("my_tracer6 cur_event = -1")
             self.cur_event = -1
         else:
+            print("my_tracer6 cur_event =  0")
             self.cur_event = 0
 
         if event == "return" and frame.f_code.co_name == self.skipfunction and self.skipfunction != "<module>":
@@ -177,6 +182,11 @@ class Python_tacer():
             print(self.oldline)
         else:
             pass
+
+        #f = inspect.currentframe()
+        frame2 = sys._current_frames().get(threading.get_ident(), None)
+        #line = linecache.getline(frame2.f_code.co_filename, frame2.f_lineno)  
+        
         line = linecache.getline(filename, frame.f_lineno)
         self.oldline = line
 
@@ -186,17 +196,27 @@ class Python_tacer():
         if self.quit_value == 1:
             raise SystemExit()
         self.WaitUntil(1)
-        self.cur_event = 0
+        
+        # if event == 'call':
+        #     print("func6 cur_event = -1")
+        #     self.cur_event = -1
+        # else:
+        #     print("func6 cur_event =  0")
+        #     self.cur_event = 0
+
+        #print("func6 cur_event = 0")
+        #self.cur_event = 0
         self.initial_run = self.initial_run + 1
         command2 = self.command_func(self.step[self.command_index],frame,event)
-        print(self.step)
+        #print(self.step)
 
         self.step[self.command_index] = ''
         for i in range(len(self.step)-(self.command_index+1)):
-            print(i)
+            #print(i)
             self.step.remove(self.step[self.command_index+i])
 
-        self.command_index = self.command_index + 1            
+        self.command_index = self.command_index + 1     
+
 
         if command2 == 's':
             return self.func6
@@ -211,13 +231,14 @@ class Python_tacer():
     """
     def command_func(self, command, frame, event):
         #make sure to uncomment
-        if not self.CactusStack.is_empty():
-            print(self.CactusStack.print_tree())
+        # if not self.CactusStack.is_empty():
+        #     print(self.CactusStack.print_tree())
         if command == "":
             return self.previous_command
         if command[0] == "p":
             pass
-        if command[0] == "s":            
+        if command[0] == "s":
+            #print("command = ", command[0])            
             return "s"
         if command[0] == "n":
             return "n"
@@ -229,9 +250,9 @@ class Python_tacer():
     """
     def lines(self, frame, event):
         # make sure to uncomment
-        if event == 'return':
-            self.CactusStack.pop()
-            print(self.CactusStack.print_tree())
+        # if event == 'return':
+        #     self.CactusStack.pop()
+        #     print(self.CactusStack.print_tree())
         if self.list_lines == True:
             length_file = len(self.filepath_var)
             filename = self.filepath_var[1:length_file]
@@ -305,18 +326,18 @@ class Python_tacer():
     def reset_steplist(self):
         self.quit_value = 0
         self.breakpointlist = []
-        print("In reset_steplist")
-        print("Command index is " + str(self.command_index))
+        #print("In reset_steplist")
+        #print("Command index is " + str(self.command_index))
         #self.step = []
-        print("Step contains: ")
-        print(', '.join(str(step)))
+        #print("Step contains: ")
+        #print(', '.join(str(step)))
         self.command_index = 0
         self.step = ['s']
-        print("Command index is " + str(self.command_index))
+        #print("Command index is " + str(self.command_index))
         #self.step = []
-        print("Step contains: ")
+        #print("Step contains: ")
         #print(', '.join(str(step)))
-        print(self.step)
+        #print(self.step)
 
 """
 This is the main object instantiation of the Python_tracer class.
@@ -362,9 +383,12 @@ def quit():
 """Executes one line of code. No parameters"""
 def step():
     thing1.WaitUntil(0)
-    print(thing1.cur_event)
-    print("thing1.command_index = ", thing1.command_index)
-    print("num of threads = ", threading.active_count())
+    #print(thing1.cur_event)
+    #print("thing1.command_index = ", thing1.command_index)
+    #print("num of threads = ", threading.active_count())
+    # line = ""
+    # line = linecache.getline(thing1.filepath_var[1:], thing1.cur_frame.f_lineno-1)
+    # print("lineno = ", thing1.cur_frame.f_lineno-1)
     thing1.step1()
     thing1.Set(1)
 
@@ -380,7 +404,7 @@ def continue_run():
 
 """Helper function for continue_run. Parameter of linenumberlist (list of ints)"""
 def breakpoint(linenumberlist):
-    print("num of threads = ", threading.active_count())
+    #print("num of threads = ", threading.active_count())
     line = ""
     while thing1.cur_frame.f_lineno-1 not in linenumberlist:
         step()
@@ -399,13 +423,26 @@ def stepout():
 Implements stepover functionality of the debugger. No parameters
 corner case: calling stepover while not over function doesn't work as intended
 """
-def stepover():    
+def stepover():
+    thing1.WaitUntil(0)  
     print("cur_event = ",thing1.cur_event)
+    line = ""
     if thing1.cur_event != -1:
+        print("step instead of stepover")
+        line = linecache.getline(thing1.filepath_var[1:], thing1.cur_frame.f_lineno-1)
+        print("lineno = ", thing1.cur_frame.f_lineno-1)
         step()
     else:        
+        #step()
         step()
+        print("after step in stepover")
+        line = linecache.getline(thing1.filepath_var[1:], thing1.cur_frame.f_lineno-1)
+        print("lineno = ", thing1.cur_frame.f_lineno-1)
         stepout()
+        print("lineno = ", thing1.cur_frame.f_lineno-1)
+        #thing1.Set(1)
+        step()
+    #thing1.Set(1)
 
         #previous working try!!!!!!!!!!!!!!!!!! save this just in case, for now
         # print(thing1.cur_frame.f_lineno)
@@ -433,5 +470,7 @@ Begins executing a thread (a program) assuming that the target has been set. No 
 def start():
     thing1.reset_steplist()
     t1 = threading.Thread(name='Thread1', target=Thread1)
+    #t_test = threading.get_ident()
+    #print("thread name = ", t_test)
     t1.start()
     threads[0] = t1

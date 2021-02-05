@@ -6,7 +6,7 @@ threads = []
 
 def myfunc(i):
     print("sleeping 2 sec from thread {}".format(i))
-    time.sleep(.01)
+    #time.sleep(.01)
     # raise SystemExit()
     print("finished sleeping from thread {}".format(i))
 
