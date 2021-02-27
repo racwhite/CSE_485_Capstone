@@ -156,8 +156,11 @@ if __name__ == '__main__':
 	Cactus.push(Node('func1', {'a':10, 'b':20, 'c':30}))
 	Cactus.push(Node('func2', {'a':100, 'b':200, 'c':300}))
 	Cactus.pop()
+	Cactus.push(Node('func2', {'a':100, 'b':200, 'c':300}))
 	Cactus.pop()
 	Cactus.push(Node('func3', {'a':1000, 'b':2000, 'c':3000}))
+	Cactus.push(Node('func4', {'s': 123}))
+	Cactus.pop()
 
 	print(Cactus.print_tree())
 

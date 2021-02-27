@@ -1,0 +1,353 @@
+Test case 1
+my_tracer6 cur_event = -1
+func6 cur_event =  0
+a = 0
+
+func6 cur_event =  0
+def fun():
+
+func6 cur_event =  0
+def thing1():
+
+func6 cur_event =  0
+def checka():
+
+func6 cur_event =  0
+def check():
+
+func6 cur_event =  0
+def recursion(n=5):
+
+func6 cur_event =  0
+def for_loop():
+
+func6 cur_event =  0
+for i in range(0, 3):
+
+func6 cur_event =  0
+0
+    print(i)
+
+func6 cur_event =  0
+for i in range(0, 3):
+
+func6 cur_event =  0
+1
+    print(i)
+
+func6 cur_event =  0
+for i in range(0, 3):
+
+func6 cur_event =  0
+2
+    print(i)
+
+func6 cur_event =  0
+for i in range(0, 3):
+
+func6 cur_event =  0
+a=12
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+check()
+
+func6 cur_event =  0
+    e = 5
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    for_loop()
+
+func6 cur_event =  0
+    for i in range(0, 5):
+
+func6 cur_event =  0
+0
+        print(i)
+
+func6 cur_event =  0
+    for i in range(0, 5):
+
+func6 cur_event =  0
+1
+        print(i)
+
+func6 cur_event =  0
+    for i in range(0, 5):
+
+func6 cur_event =  0
+2
+        print(i)
+
+func6 cur_event =  0
+    for i in range(0, 5):
+
+func6 cur_event =  0
+3
+        print(i)
+
+func6 cur_event =  0
+    for i in range(0, 5):
+
+func6 cur_event =  0
+4
+        print(i)
+
+func6 cur_event =  0
+    for i in range(0, 5):
+
+func6 cur_event =  0
+    return
+
+func6 cur_event =  0
+    return
+
+func6 cur_event =  0
+    t = 12
+
+func6 cur_event =  0
+    d = 123
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    fun()
+
+func6 cur_event =  0
+got here
+    print("got here")
+
+func6 cur_event =  0
+    a = 3.56235
+
+func6 cur_event =  0
+    b = 2.5
+
+func6 cur_event =  0
+    c = a + b
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    d = thing1()
+
+func6 cur_event =  0
+    a = 1+2
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    checka()
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    return a
+
+func6 cur_event =  0
+    return a
+
+func6 cur_event =  0
+3.56235
+    print(a)
+
+func6 cur_event =  0
+    return "GFG"
+
+func6 cur_event =  0
+    return "GFG"
+
+func6 cur_event =  0
+    y = 145
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    checka()
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    recursion()
+
+func6 cur_event =  0
+    if(n > 1):
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+        return recursion(n-1)
+
+func6 cur_event =  0
+    if(n > 1):
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+        return recursion(n-1)
+
+func6 cur_event =  0
+    if(n > 1):
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+        return recursion(n-1)
+
+func6 cur_event =  0
+    if(n > 1):
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+        return recursion(n-1)
+
+func6 cur_event =  0
+    if(n > 1):
+
+func6 cur_event =  0
+        return n-1
+
+func6 cur_event =  0
+        return n-1
+
+func6 cur_event =  0
+        return recursion(n-1)
+
+func6 cur_event =  0
+        return recursion(n-1)
+
+func6 cur_event =  0
+        return recursion(n-1)
+
+func6 cur_event =  0
+        return recursion(n-1)
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    return fun()
+
+func6 cur_event =  0
+got here
+    print("got here")
+
+func6 cur_event =  0
+    a = 3.56235
+
+func6 cur_event =  0
+    b = 2.5
+
+func6 cur_event =  0
+    c = a + b
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    d = thing1()
+
+func6 cur_event =  0
+    a = 1+2
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    checka()
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    return a
+
+func6 cur_event =  0
+    return a
+
+func6 cur_event =  0
+3.56235
+    print(a)
+
+func6 cur_event =  0
+    return "GFG"
+
+func6 cur_event =  0
+    return "GFG"
+
+func6 cur_event =  0
+    return fun()
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+fun()
+
+func6 cur_event =  0
+got here
+    print("got here")
+
+func6 cur_event =  0
+    a = 3.56235
+
+func6 cur_event =  0
+    b = 2.5
+
+func6 cur_event =  0
+    c = a + b
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    d = thing1()
+
+func6 cur_event =  0
+    a = 1+2
+
+func6 cur_event =  0
+my_tracer6 cur_event = -1
+    checka()
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    a = 4
+
+func6 cur_event =  0
+    return a
+
+func6 cur_event =  0
+    return a
+
+func6 cur_event =  0
+3.56235
+    print(a)
+
+func6 cur_event =  0
+    return "GFG"
+
+func6 cur_event =  0
+    return "GFG"
+
+<module>{'__name__': '__main__', 'a': 12, 'fun': <function fun at 0x7f3be574ed90>, 'thing1': <function thing1 at 0x7f3be55d3e18>, 'checka': <function checka at 0x7f3be55d3ea0>, 'check': <function check at 0x7f3be55d3f28>, 'recursion': <function recursion at 0x7f3be55da048>, 'for_loop': <function for_loop at 0x7f3be55da0d0>, 'i': 2}
+	check{'e': 5, 't': 12, 'd': 123, 'y': 145}
+		for_loop{'i': 4}
+		fun{'a': 3.56235, 'b': 2.5, 'c': 6.06235, 'd': 3}
+			thing1{'a': 3}
+				checka{'a': 4}
+		checka{'a': 4}
+		recursion{'n': 5}
+			recursion{'n': 4}
+				recursion{'n': 3}
+					recursion{'n': 2}
+						recursion{'n': 1}
+		fun{'a': 3.56235, 'b': 2.5, 'c': 6.06235, 'd': 3}
+			thing1{'a': 3}
+				checka{'a': 4}
+	fun{'a': 3.56235, 'b': 2.5, 'c': 6.06235, 'd': 3}
+		thing1{'a': 3}
+			checka{'a': 4}
+
+func6 cur_event =  0
+a = 2
+
+should be at linenumber 22 --> e = 5

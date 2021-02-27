@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
-from cactus import Node
-import LinkedList
+#from cactus import Node
 import analysis3
 import importlib.util
 from sys import settrace
@@ -50,7 +49,6 @@ class Python_tacer():
         self.quit_value = 0
         self.oldline = ""
         self.lastlineofprogram = 0
-        self.cur_event2 = ''
         #self.localStorage = threading.local()
         #self.localStorage.step = []
         #self.localStorage.command_index = 0
@@ -59,8 +57,7 @@ class Python_tacer():
         self.var_mutex = threading.Lock()
         self.var_event = threading.Event()
 
-        self.CactusStack = None
-        self.scope = None
+        #self.CactusStack = None
 
     """
     This function does nothing and is not used in the code
@@ -121,32 +118,15 @@ class Python_tacer():
 
         #make sure to uncomment
         self.cur_frame = frame
-
-        if(self.CactusStack is None or self.CactusStack.is_empty()):
-            self.CactusStack = Node(frame.f_code.co_name, frame.f_locals)
-            del self.CactusStack.current_frame.vars['__builtins__']
-            #self.CactusStack.reset_scopes()
-        elif event != 'return':
-            print("Updating Cactus Stack on line no " + str (frame.f_lineno))
-            self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
-        # if(self.scope is None or self.scope.is_empty()):
-        #     self.scope = LinkedList.FrameList()
-        #     self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
-        #     del self.scope.current_frame.frame_vars['__builtins__']
-        #     #self.scope.reset_scopes()
-        #     #Node.scopes = [frame.f_code.co_name]
-        #     print(self.scope.print_current_frame())
+        # if(self.CactusStack is None or self.CactusStack.is_empty()):
+        #     self.CactusStack = Node(frame.f_code.co_name, frame.f_locals)
+        #     self.CactusStack.reset_scopes()
+        #     Node.scopes = [frame.f_code.co_name]
+        #     del self.CactusStack.current_frame.vars['__builtins__']
+        #     print(self.CactusStack.print_tree())
         # else:
-        #     self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
-        #     print(self.scope.print_current_frame())
-        
-        # if event == 'return':
-        #     print("return in my_tracer 6 and linenum = ", frame.f_lineno)
-        #     self.scope.exit_frame()
-
-        if event == 'return':
-            print("Tracer6 popping Cactus Stack on line no " + str (frame.f_lineno))
-            self.CactusStack.pop()
+        #     self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
+        #     print(self.CactusStack.print_tree())
 
         if event == 'call':
             print("my_tracer6 cur_event = -1")
@@ -180,9 +160,9 @@ class Python_tacer():
                 else:
                     return self.func6
             else:
-                #self.lines(frame, event)
+                self.lines(frame, event)
                 return self.my_tracer6
-        #self.lines(frame, event)
+        self.lines(frame, event)
         return self.my_tracer6
 
     """
@@ -191,38 +171,19 @@ class Python_tacer():
     """
     def step_over(self, frame, event, arg):
         self.cur_frame = frame
-        # self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
-        # print(self.scope.print_current_frame())
-
         if self.skipline == False:
-            pass
-            #self.lines(frame, event)
+            self.lines(frame, event)
         if event == "return":
-            self.CactusStack.pop()
-            #self.lines(frame, event)
+            self.lines(frame, event)
             return self.my_tracer6
         return self.my_tracer6
 
     """
-    This function is run when the command is 'n' and is called from func6.
+    This fucntion is run when the command is 'n' and is called from func6.
     Has parameters of frame, (frame object),event, (String), and arg (arguments).
     """
     def func6(self,frame, event, arg):
         self.cur_frame = frame
-        #self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
-
-        if event == 'call':
-            self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
-            print(self.scope.print_current_frame())
-
-        if event == 'return':
-            print("Popping func6 Cactus Stack on line no " + str (frame.f_lineno))
-            self.CactusStack.pop()
-
-        # if event == 'return':
-        #     print("return in func6 and linenum = ", frame.f_lineno)
-        #     self.scope.exit_frame()
-
         self.skipline = False
         length_file = len(self.filepath_var)
         filename = self.filepath_var[1:length_file]
@@ -241,11 +202,9 @@ class Python_tacer():
         self.continue_code = False
         self.lines(frame, event)            
         self.Set(0)
-        # if self.quit_value == 1:
-        #     raise SystemExit()
-        self.WaitUntil(1)
         if self.quit_value == 1:
             raise SystemExit()
+        self.WaitUntil(1)
         
         if event == 'call':
             print("func6 cur_event = -1")
@@ -257,15 +216,15 @@ class Python_tacer():
         #print("func6 cur_event = 0")
         #self.cur_event = 0
         self.initial_run = self.initial_run + 1
-        command2 = self.command_func(self.step.pop(),frame,event)
+        command2 = self.command_func(self.step[self.command_index],frame,event)
         #print(self.step)
 
-        #self.step[self.command_index] = ''
-        #for i in range(len(self.step)-(self.command_index+1)):
+        self.step[self.command_index] = ''
+        for i in range(len(self.step)-(self.command_index+1)):
             #print(i)
-        #    self.step.remove(self.step[self.command_index+i])
+            self.step.remove(self.step[self.command_index+i])
 
-        #self.command_index = self.command_index + 1
+        self.command_index = self.command_index + 1
 
 
         if command2 == 's':
@@ -428,12 +387,7 @@ def quit():
     thing1.step1()
     thing1.quit_value = 1
     thing1.Set(1)
-    try:
-        #print("allframes")
-        #thing1.scope.print_all_frames()
-        threads[0].join()
-    except:
-        print("Error: Used quit without a coresponding start. please use start to start tracing.")
+    threads[0].join()
 
 """Executes one line of code. No parameters"""
 def step():
@@ -549,6 +503,4 @@ def start():
     #t_test = threading.get_ident()
     #print("thread name = ", t_test)
     t1.start()
-    if threads[0] == '':
-        step()
     threads[0] = t1

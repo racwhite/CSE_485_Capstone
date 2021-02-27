@@ -1,4 +1,4 @@
-global a
+a = 0
 def fun():
     print("got here")
     a = 3.56235
