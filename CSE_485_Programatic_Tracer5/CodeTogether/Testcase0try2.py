@@ -4,34 +4,48 @@ import myscript5
 
 """multiple Programs"""
 
+#tracer = myscript5.Python_tracer()
+#tracer.setFilePath("/myscript2.py")
+#tracer.start()
+#for i in range(18):
+#    tracer.step()
+#tracer.stepover()
+#tracer.step()
+#tracer.stepout()
+#print('quitting')
+#tracer.quit()
+#print('quitted')
+#tracer.setFilePath("/myscript2.py")
+#tracer.start()
+#for i in range(18):
+#    tracer.step()
+#tracer.stepover()
+#tracer.step()
+#tracer.stepout()
+#print('quitting')
+#tracer.quit()
+#print('quitted')
+
+""" multiple programs with stepping """
+
 # tracer = myscript5.Python_tracer()
 # tracer.setFilePath("/myscript2.py")
 # tracer.start()
-# for i in range(18):
+# for i in range(1):
 #     tracer.step()
-# tracer.stepover()
-# tracer.step()
-# tracer.stepout()
-# print('quitting')
 # tracer.quit()
-# print('quitted')
-# tracer.setFilePath("/myscript2.py")
+# tracer.setFilePath("/helloworld.py")
 # tracer.start()
-# for i in range(18):
+# for i in range(1):
 #     tracer.step()
-# tracer.stepover()
-# tracer.step()
-# tracer.stepout()
-# print('quitting')
 # tracer.quit()
-# print('quitted')
 
 """Testing stepover not on function"""
 
 # tracer = myscript5.Python_tracer()
 # tracer.setFilePath("/myscript2.py")
 # tracer.start()
-# for i in range(19):
+# for i in range(20):
 #     tracer.step()
 # tracer.stepover()
 # tracer.quit()
@@ -126,8 +140,9 @@ import myscript5
 # tracer.start()
 # tracer.step()
 # tracer.step()
+# tracer.quit()
 
-'''a bunch of steps in a row'''
+'''100 steps in a row'''
 
 # tracer = myscript5.Python_tracer()
 # tracer.setFilePath("/myscript2.py")
@@ -135,10 +150,85 @@ import myscript5
 # for i in range(100):
 #     tracer.step()
 
+"""test continueRun() and addbreakpoint() end at line 30"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# tracer.addbreakpoint([30])
+# tracer.continueRun()
+# tracer.step()
+# tracer.step()
+
+"""test continueRun() and addbreakpoint() end at line 1"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# tracer.addbreakpoint([29, 46, 1])
+# tracer.removebreakpoint(29)
+# tracer.removebreakpoint(1)
+# tracer.continueRun()
+# tracer.removebreakpoint(46)
+# tracer.continueRun()
+# tracer.quit()
+
+"""start with stepout()"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# tracer.stepout()
+
+"""start with continueRun()"""
+
 tracer = myscript5.Python_tracer()
 tracer.setFilePath("/myscript2.py")
 tracer.start()
-tracer.addbreakpoint([30])
 tracer.continueRun()
-tracer.step()
-tracer.step()
+tracer.quit()
+
+"""start with stepover() and followed by stepping"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# tracer.stepover()
+# tracer.stepover()
+# for i in range(17):
+#     tracer.step()
+# tracer.stepover()
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# for i in range(17):
+#     tracer.step()
+# tracer.stepover()
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# for i in range(121):
+#     tracer.step()
+# tracer.quit()
+
+"""run alot of time past program"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# for i in range(1000):
+#     tracer.step()
+# tracer.quit()
+
+"""start and quit unique arragements"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# tracer.step()
+# tracer.quit()
+# tracer.start()
+# tracer.step()
+# tracer.quit()

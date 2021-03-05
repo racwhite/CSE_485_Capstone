@@ -28,7 +28,7 @@ class Python_tracer():
         self.quitValue = 0
 
     def reset(self):
-        self.lastlineofprogram = 0
+        #self.lastlineofprogram = 0
         self.commandQueue = []
         self.threads = None
         self.var = 0
@@ -47,8 +47,9 @@ class Python_tracer():
     def getlastline(self, filepath):
         ProgramlineNumberCounter = 0
         with open(filepath, 'r') as file:
-            for i in file:
+            for line in file:
                 ProgramlineNumberCounter = ProgramlineNumberCounter + 1
+        print("In getlastline. Last line of file is line # " + str(ProgramlineNumberCounter))
         return ProgramlineNumberCounter
     
     def injectTracer(self):
@@ -65,22 +66,19 @@ class Python_tracer():
     def mainTracer(self, frame, event, arg):
         self.curFrame = frame
         self.curEvent = event
-        print('waiting at mainTraer')
+        print('waiting at mainTracer')
         if self.initialRun != 0:
             self.WaitUntil(1)
         if self.quitValue == 1:
             raise SystemExit()
         if self.command != "stepover" and self.command != 'stepout':
             self.Set(0)
-        if self.initialRun == 0:
-            print(str(frame.f_lineno) + '\t' + frame.f_code.co_name)
-            self.initialRun = 1
         if self.command == "stepover" and frame.f_code.co_name == '<module>':
             print('here I got')
             self.Set(0)
         print('mainTracer')
-        if self.initialRun != 0:
-            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
+        #if self.initialRun != 0:
+        print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
         if event == 'call' and self.command == 'step':
             return self.innerFunction
         if event == 'call' and self.command == 'stepover' and frame.f_code.co_name != '<module>':
@@ -89,17 +87,20 @@ class Python_tracer():
             return self.innerFunctionStepout
         if self.command == "stepover" or self.command == "stepout":
             self.Set(0)
-        return self.mainTracer
+        #return self.mainTracer
 
     def innerFunction(self, frame, event, arg):
         self.curFrame = frame
         self.curEvent = event
+        print('inner function')
+        if self.initialRun != 0:
+            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
+        if self.initialRun == 0:
+            self.initialRun += 1
         self.WaitUntil(1)
         if self.quitValue == 1:
             raise SystemExit()
         self.Set(0)
-        print('inner function')
-        print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
 
     def innerFunctionStepover(self, frame, event, arg):
         self.curFrame = frame
@@ -126,7 +127,12 @@ class Python_tracer():
         t1 = threading.Thread(name='TracerThread', target=self.TracerThread)
         t1.start()
         self.threads = t1
-        self.step()
+        #self.step()
+
+    def quitEndProgram(self):
+        settrace(None)
+        self.quitValue = 1
+        self.Set(1)
 
     def quit(self):
         settrace(None)
@@ -154,9 +160,13 @@ class Python_tracer():
             self.var_event.wait(1) # Wait 1 sec
 
     def commandHandler(self, command):
-        self.command = command
-        self.Set(1)
-        self.WaitUntil(0)
+        if self.curFrame is not None and (int(self.lastlineofprogram) == int(self.curFrame.f_lineno)):
+                #print("reached last line of file")
+                self.quit()
+        else:
+            self.command = command
+            self.Set(1)
+            self.WaitUntil(0)
 
     def step(self):
         newCommand = "step"
@@ -188,8 +198,8 @@ class Python_tracer():
     def continueRun(self):
         if self.curFrame == None:
             self.step()
-        if self.curFrame.f_lineno == 1:
-            self.step()
+        # if self.curFrame.f_lineno == 1:
+        #     self.step()
             #print(linecache.getline(self.curFrame.f_code.co_name, self.curFrame.f_lineno))
         while self.curFrame.f_lineno not in self.breakpointlist and self.curFrame.f_lineno != self.lastlineofprogram:
             self.commandHandler('step') 
