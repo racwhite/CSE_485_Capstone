@@ -160,18 +160,24 @@ import myscript5
 # tracer.step()
 # tracer.step()
 
-"""test continueRun() and addbreakpoint() end at line 1"""
+"""test continueRun() and addbreakpoint() end at line 1 ***"""
 
 # tracer = myscript5.Python_tracer()
 # tracer.setFilePath("/myscript2.py")
 # tracer.start()
-# tracer.addbreakpoint([29, 46, 1])
+# tracer.addbreakpoint([29, 45, 46, 1, 47, 50])
 # tracer.removebreakpoint(29)
 # tracer.removebreakpoint(1)
 # tracer.continueRun()
-# tracer.removebreakpoint(46)
+# tracer.removebreakpoint(45)
+# print(tracer.CactusStack.print_tree())
 # tracer.continueRun()
+# print(tracer.CactusStack.print_tree())
+# tracer.continueRun()
+# tracer.continueRun()
+# print(tracer.CactusStack.print_tree())
 # tracer.quit()
+# print(tracer.CactusStack.print_tree())
 
 """start with stepout()"""
 
@@ -182,11 +188,13 @@ import myscript5
 
 """start with continueRun()"""
 
-tracer = myscript5.Python_tracer()
-tracer.setFilePath("/myscript2.py")
-tracer.start()
-tracer.continueRun()
-tracer.quit()
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# tracer.continueRun()
+# tracer.quit()
+# tracer.CactusStack.print_all_scopes()
+# print(tracer.CactusStack.print_tree())
 
 """start with stepover() and followed by stepping"""
 
@@ -220,6 +228,8 @@ tracer.quit()
 # tracer.start()
 # for i in range(1000):
 #     tracer.step()
+# tracer.CactusStack.print_all_scopes()
+# print(tracer.CactusStack.print_tree())
 # tracer.quit()
 
 """start and quit unique arragements"""
@@ -228,7 +238,11 @@ tracer.quit()
 # tracer.setFilePath("/myscript2.py")
 # tracer.start()
 # tracer.step()
+# tracer.CactusStack.print_all_scopes()
+# print(tracer.CactusStack.print_tree())
 # tracer.quit()
 # tracer.start()
 # tracer.step()
+# tracer.CactusStack.print_all_scopes()
+# print(tracer.CactusStack.print_tree())
 # tracer.quit()
