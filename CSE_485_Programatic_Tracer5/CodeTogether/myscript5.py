@@ -41,15 +41,13 @@ class Python_tracer():
         self.breakpointlist = []
         self.curFrame = None
         self.quitValue = 0
-        self.CactusStack = None
-        self.scope = None
 
     def setFilePath(self, filepathParam):
         self.filepath = filepathParam
         self.lastlineofprogram = self.getlastline(self.filepath[1:])
     
     def getlastline(self, filepath):
-        ProgramlineNumberCounter = 0
+        ProgramlineNumberCounter = 1
         with open(filepath, 'r') as file:
             for line in file:
                 ProgramlineNumberCounter = ProgramlineNumberCounter + 1
@@ -81,7 +79,10 @@ class Python_tracer():
         #     if event == 'return':
         #         self.scope.exit_frame()
         if self.CactusStack is None or self.CactusStack.is_empty():
+            self.CactusStack = None
+            self.scope = None
             self.CactusStack = Node(frame.f_code.co_name, frame.f_locals)
+            self.CactusStack.reset_scopes()
             del self.CactusStack.current_frame.vars['__builtins__']
         else:
             self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
@@ -112,10 +113,14 @@ class Python_tracer():
     def innerFunction(self, frame, event, arg):
         self.curFrame = frame
         self.curEvent = event
-        self.WaitUntil(1)
-        self.Set(0)
+        if self.initialRun != 0 and event != 'return':
+            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
+        if self.initialRun != 0:
+            self.Set(0)
+            self.WaitUntil(1)
+            print('here')
         if self.quitValue == 1:
-            #self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
+            self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
             raise SystemExit()
         if event == 'return':
             self.CactusStack.pop()
@@ -126,8 +131,12 @@ class Python_tracer():
         #     self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
         #     self.scope.exit_frame()
         print('inner function')
-        if self.initialRun != 0:
-            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
+        
+        
+        # if self.initialRun != 0 and event != 'return':
+        #     print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
+        
+        
         if self.initialRun == 0:
             self.initialRun += 1
         # if self.quitValue == 1:
@@ -162,9 +171,7 @@ class Python_tracer():
         #self.step()
 
     def quitEndProgram(self):
-        settrace(None)
-        self.quitValue = 1
-        self.Set(1)
+        self.commandHandler('quit')
 
     def quit(self):
         settrace(None)
@@ -173,8 +180,7 @@ class Python_tracer():
         #self.scope.print_all_frames()
         try:
             self.threads.join()
-            self.CactusStack.reset_scopes()
-            self.reset()
+            # self.reset()
         except:
             print("Error: Used quit without a coresponding start. please use start to start tracing.")
 
@@ -195,8 +201,10 @@ class Python_tracer():
             self.var_event.wait(1) # Wait 1 sec
 
     def commandHandler(self, command):
-        if self.curFrame is not None and (int(self.lastlineofprogram) == int(self.curFrame.f_lineno)):
+        if self.curFrame is not None and (int(self.lastlineofprogram) <= int(self.curFrame.f_lineno)):
             #print("reached last line of file")
+            self.quit()
+        elif command == 'quit':
             self.quit()
         else:
             self.command = command
@@ -235,10 +243,11 @@ class Python_tracer():
             self.step()
         # if self.curFrame.f_lineno == 1:
         #     self.step()
-            #print(linecache.getline(self.curFrame.f_code.co_name, self.curFrame.f_lineno))
+        #print(linecache.getline(self.curFrame.f_code.co_name, self.curFrame.f_lineno))
         while self.curFrame.f_lineno not in self.breakpointlist and self.curFrame.f_lineno != self.lastlineofprogram:
+            # print(self.curFrame.f_lineno)
             self.commandHandler('step')
-        self.step()
+        #self.step()
 
     def addbreakpoint(self, breakpointNew):
         for breakpointElement in breakpointNew:
@@ -247,3 +256,7 @@ class Python_tracer():
     def removebreakpoint(self, breakpointToRemove):
         self.breakpointlist.remove(breakpointToRemove)
     
+    def printScopeTree(self):
+        #self.WaitUntil(0)
+        print(self.CactusStack.print_tree())
+        self.CactusStack.print_frame()

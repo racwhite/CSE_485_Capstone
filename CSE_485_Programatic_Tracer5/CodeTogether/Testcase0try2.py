@@ -246,3 +246,62 @@ import myscript5
 # tracer.CactusStack.print_all_scopes()
 # print(tracer.CactusStack.print_tree())
 # tracer.quit()
+
+"""step 118 times and test CactusStack print out"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# for i in range(118):
+#     tracer.step()
+# tracer.printScopeTree()
+# tracer.step()
+# tracer.printScopeTree()
+# tracer.quit()
+
+""" continue run with cactus stack and the issue with quit() and printScopeTree()"""
+
+# tracer = myscript5.Python_tracer()
+# tracer.setFilePath("/myscript2.py")
+# tracer.start()
+# for i in range(18):
+#     tracer.step()
+# tracer.addbreakpoint([48])
+# tracer.continueRun()
+# #tracer.continueRun()
+# tracer.printScopeTree()
+# tracer.step()
+# tracer.printScopeTree()
+# tracer.step()
+# tracer.quit()
+# tracer.printScopeTree()
+
+"""cehcking the printScopeTree()"""
+"""
+tracer = myscript5.Python_tracer()
+tracer.setFilePath("/myscript2.py")
+tracer.start()
+for i in range(19):
+    tracer.step()
+tracer.printScopeTree()
+tracer.addbreakpoint([29])
+tracer.continueRun()
+tracer.quit()
+"""
+
+tracer = myscript5.Python_tracer()
+tracer.setFilePath("/myscript2.py")
+tracer.start()
+for i in range(16):
+     tracer.step()
+tracer.addbreakpoint([24,48])
+tracer.continueRun()
+tracer.removebreakpoint(24)
+tracer.continueRun()
+tracer.printScopeTree()
+tracer.step()
+tracer.printScopeTree()
+tracer.step()
+tracer.step()
+tracer.quit()
+tracer.printScopeTree()
