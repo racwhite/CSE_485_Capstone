@@ -1,6 +1,7 @@
 from cactus import Node
-import LinkedList
-import analysis3
+# import LinkedList
+# import analysis3
+import hoare_logic
 import importlib.util
 from sys import settrace
 import sys
@@ -28,6 +29,9 @@ class Python_tracer():
         self.quitValue = 0
         self.CactusStack = None
         self.scope = None
+        self.stepover_active = False
+        self.stepover_call_depth = 0
+        self.logic_checker = None
 
     def reset(self):
         #self.lastlineofprogram = 0
@@ -41,18 +45,19 @@ class Python_tracer():
         self.breakpointlist = []
         self.curFrame = None
         self.quitValue = 0
+        self.logic_checker = None
 
     def setFilePath(self, filepathParam):
         self.filepath = filepathParam
         self.lastlineofprogram = self.getlastline(self.filepath[1:])
     
     def getlastline(self, filepath):
-        ProgramlineNumberCounter = 1
+        programLineNumberCounter = 0
         with open(filepath, 'r') as file:
             for line in file:
-                ProgramlineNumberCounter = ProgramlineNumberCounter + 1
-        print("In getlastline. Last line of file is line # " + str(ProgramlineNumberCounter))
-        return ProgramlineNumberCounter
+                programLineNumberCounter += 1
+        print("In getlastline. Last line of file is line # " + str(programLineNumberCounter))
+        return programLineNumberCounter
     
     def injectTracer(self):
         globals = {}
@@ -63,9 +68,30 @@ class Python_tracer():
         with open(currentDirectorypath, 'rb') as file:
             codeObject = compile(file.read(), currentDirectorypath, 'exec')
             settrace(self.mainTracer)
+            #try:
             exec(codeObject, globals, None)
+            print("exec() returned")
+            #except:
+            #    pass
 
     def mainTracer(self, frame, event, arg):
+        '''
+        This is a settrace() callback function.  It is the global callback
+        function set during initialization.
+
+        :param frame: frame object
+        :param event String: "call", "line", "return", "exception", "opcode"
+        :param arg:
+        :return:    settrace() local callback function
+
+        This function only processes the 'call' event.  During processing
+        of the call event, the function sets the local callback function
+        which will trace the lines within the called function.  Thus,
+        innerFunction() and InnerFunctionStepover() trace line and return
+        events.
+
+        The first invocation is a call event to <module>
+        '''     
         self.curFrame = frame
         self.curEvent = event
         # if self.scope is None or self.scope.is_empty():
@@ -78,6 +104,12 @@ class Python_tracer():
         #         self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
         #     if event == 'return':
         #         self.scope.exit_frame()
+
+        # push current frame onto CactusStack
+        print("mainTracer(): push node ", frame.f_code.co_name)
+        # if first time through
+        if self.logic_checker is None:
+            self.logic_checker = hoare_logic.program_conditions("conditions.txt")
         if self.CactusStack is None or self.CactusStack.is_empty():
             self.CactusStack = None
             self.scope = None
@@ -85,80 +117,131 @@ class Python_tracer():
             self.CactusStack.reset_scopes()
             del self.CactusStack.current_frame.vars['__builtins__']
         else:
+            # add node for current frame
+            self.logic_checker.check_conditions({}, scopes=self.CactusStack.current_frame.vars)
             self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
-        print('waiting at mainTracer')
-        if self.initialRun != 0:
-            self.WaitUntil(1)
+
+
+        print('waiting at mainTracer(): ', event, ' ', frame.f_code.co_name)
+        # print the current source line
+        print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno), end='')
+        # wait for a commend
+        self.WaitUntil(1)
+        print('mainTracer(): ', self.command)
+
+        # The normal means of quitting is when a local trace function
+        # encounters a returm from <module>.
+        # if commanded to quit, push frame and exit
         if self.quitValue == 1:
+            print("mainTracer(): quitValue")
             self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
+            self.logic_checker.check_conditions({}, scopes=self.CactusStack.current_frame.vars)
             raise SystemExit()
-        if self.command != "stepover" and self.command != 'stepout':
+        if self.command != "stepover":
             self.Set(0)
+        # one way that stepover must end, at outer scope                                                
         if self.command == "stepover" and frame.f_code.co_name == '<module>':
             print('here I got')
             self.Set(0)
-        print('mainTracer')
-        #if self.initialRun != 0:
-        print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
         if event == 'call' and self.command == 'step':
+            # set local settrace() callback function for stepping
             return self.innerFunction
         if event == 'call' and self.command == 'stepover' and frame.f_code.co_name != '<module>':
+            self.stepover_call_depth += 1
+            # switch settrace() local callback function to innerFunctionStepover()                                                                                                        
             return self.innerFunctionStepover
-        if self.command == 'stepout':
-            return self.innerFunctionStepout
-        if self.command == "stepover" or self.command == "stepout":
-            self.Set(0)
-        #return self.mainTracer
 
     def innerFunction(self, frame, event, arg):
+        '''
+        This is a settrace() local callback function.  This callback persists
+        for the duration of the current frame; that is, for the current function.
+        After processing a return event, the global callback again becomes
+        active.
+
+        :param frame: frame object
+        :param event String: "line", "return", "exception", "opcode"
+        :param arg:
+        :return:    settrace() local callback function
+        '''
         self.curFrame = frame
         self.curEvent = event
-        if self.initialRun != 0 and event != 'return':
-            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
-        if self.initialRun != 0:
-            self.Set(0)
-            self.WaitUntil(1)
-            print('here')
-        if self.quitValue == 1:
-            self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
-            raise SystemExit()
-        if event == 'return':
+        print('waiting innerFunction(): ', event, frame.f_code.co_name)
+        #if event == 'return':
+        #    if 'return ' not in linecache.getline(self.filepath[1:], frame.f_lineno):
+        #        print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno), end = '')
+        #else:
+        #    print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno), end = '')
+        if event == 'line':
+            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno), end = '')
+            self.logic_checker.check_conditions({}, scopes=self.CactusStack.current_frame.vars)
+        # wait for command
+        self.WaitUntil(1)
+
+        # print command, should be event == line or call
+        print('innerFunction(): ', self.command)
+
+        # the initial stepover command may be detected here
+        # during line event processing
+        if event == 'line':
+            if self.command == 'stepover':
+                # if this is the initial stepover command
+                # initialize variables for mainTracer to handle
+                # following call event
+                if self.stepover_active == False:
+                    self.stepover_active = True
+                    self.stepover_call_depth = 0
+                # innerFunctionStepover() detects command complete
+                return
+
+        if event == 'return' and frame.f_code.co_name != '<module>':
+            print("innerFunction return pop node ", frame.f_code.co_name)
+            self.logic_checker.check_conditions({}, scopes=self.CactusStack.current_frame.vars)
             self.CactusStack.pop()
-        # if event == 'return':
-        #     self.scope.exit_frame()
-        # self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
-        # if event == 'return':
-        #     self.scope.insert_frame(frame.f_code.co_name, frame.f_locals)
-        #     self.scope.exit_frame()
-        print('inner function')
-        
-        
-        # if self.initialRun != 0 and event != 'return':
-        #     print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
-        
-        
-        if self.initialRun == 0:
-            self.initialRun += 1
-        # if self.quitValue == 1:
-        #     self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals)) 
-        #     raise SystemExit()
+        elif event == "return" and frame.f_code.co_name == '<module>':
+            self.Set(0)
+            return
+        if self.quitValue == 1:
+            print("innerFunction quitValue ", frame.f_code.co_name)
+            #self.CactusStack.push(Node(frame.f_code.co_name, frame.f_locals))
+            self.Set(0)
+            raise SystemExit()
+
+        self.Set(0)
 
     def innerFunctionStepover(self, frame, event, arg):
+        '''
+            This is a settrace() local callback function.  This callback persists
+            for the duration of the current frame; that is, for the current function.
+            After processing a return event, the global callback again becomes
+            active.
+
+            :param frame: frame object
+            :param event String: "line", "return", "exception", "opcode"
+            :param arg:
+            :return:    settrace() local callback function
+        '''
         self.curFrame = frame
         self.curEvent = event
-        print('inner function stepover')
-        #print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno))
+        print('innerFunctionStepover(): ', event, frame.f_code.co_name, self.command)
+        if event == 'line':
+            print(str(frame.f_lineno) + '\t' + linecache.getline(self.filepath[1:], frame.f_lineno), end = '')
 
-    def innerFunctionStepout(self, frame, event, arg):
-        self.curFrame = frame
-        self.curEvent = event
-        print('inner function stepout')
-        # if event == 'return':
-        #     self.Set(0)
+        if event == 'return' and frame.f_code.co_name != '<module>':
+            print("innerFunctionStepover return pop node ", frame.f_code.co_name)
+            self.logic_checker.check_conditions({}, scopes=self.CactusStack.current_frame.vars)
+            self.CactusStack.pop()
 
-    # def stepoutFucntion(self, frame, event, arg):
-    #     self.WaitUntil(1)
-    #     self.Set(0)  
+        if event == 'return':
+            if self.stepover_call_depth > 0:
+                self.stepover_call_depth -= 1
+                # if the call deptj is 0,
+                # then this return indicates the end of the stepover
+                if self.stepover_call_depth == 0:
+                    self.stepover_active = False
+                    # indicate that stepover command is complete
+                    self.Set(0)
+            else:
+                print('inner function stepover ERROR')
 
     def TracerThread(self):
         self.injectTracer()
@@ -168,21 +251,27 @@ class Python_tracer():
         t1 = threading.Thread(name='TracerThread', target=self.TracerThread)
         t1.start()
         self.threads = t1
-        #self.step()
 
     def quitEndProgram(self):
         self.commandHandler('quit')
 
     def quit(self):
-        settrace(None)
+        #settrace(None)
+        self.WaitUntil(0)
         self.quitValue = 1
+        self.command = 'quit'
         self.Set(1)
-        #self.scope.print_all_frames()
+        self.WaitUntil(0)
+        # clearing stops callbacks
+        settrace(None)
+
         try:
             self.threads.join()
+            print("\nlogic checker results")
+            self.logic_checker.program_end({}, scopes=self.CactusStack.current_frame.vars)
             # self.reset()
         except:
-            print("Error: Used quit without a coresponding start. please use start to start tracing.")
+            print("Error: Used quit without a corresponding start. Please use start to begin trace.")
 
     def Set(self, v):
         self.var_mutex.acquire()
@@ -201,46 +290,32 @@ class Python_tracer():
             self.var_event.wait(1) # Wait 1 sec
 
     def commandHandler(self, command):
-        if self.curFrame is not None and (int(self.lastlineofprogram) <= int(self.curFrame.f_lineno)):
-            #print("reached last line of file")
-            self.quit()
-        elif command == 'quit':
+#        if self.curFrame is not None and (int(self.lastlineofprogram) <= int(self.curFrame.f_lineno)):
+#            print("reached last line of file")
+#            self.quit()
+#        elif command == 'quit':
+        if command == 'quit':
             self.quit()
         else:
+            self.WaitUntil(0)
             self.command = command
             self.Set(1)
-            self.WaitUntil(0)
 
     def step(self):
         newCommand = "step"
         self.commandHandler(newCommand)
 
     def stepover(self):
-        if self.curEvent == 'call':
+        if self.curEvent == 'call' or self.curEvent == 'line':
             newCommand = "stepover"
             self.commandHandler(newCommand)
         else:
             print('can not stepover because not over function')
 
-    def stepout(self):
-        returnFrame = self.curFrame.f_code.co_name
-        callNum = 1
-        while(True):
-            if callNum == 0:
-                print("inner break")
-                break
-            else:
-                if self.curEvent == 'call' and self.curFrame.f_code.co_name == returnFrame:
-                    callNum = callNum + 1
-                if self.curEvent == 'return' and self.curFrame.f_code.co_name == returnFrame:
-                    callNum = callNum - 1
-                print("callNum = ", callNum)
-                newCommand = 'step'
-                self.commandHandler(newCommand)
-
     def continueRun(self):
         if self.curFrame == None:
             self.step()
+        self.WaitUntil(0)
         # if self.curFrame.f_lineno == 1:
         #     self.step()
         #print(linecache.getline(self.curFrame.f_code.co_name, self.curFrame.f_lineno))
